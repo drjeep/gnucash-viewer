@@ -1,0 +1,13 @@
+import site
+site.addsitedir('/home/drjeep/workspace/gnucash/v/lib/python2.7/site-packages')
+
+import os
+root = os.path.join(os.path.dirname(__file__), '..')
+
+import sys
+sys.path.insert(0, root)
+
+from gnucash import app as application
+
+import monitor
+monitor.start(interval=1.0)

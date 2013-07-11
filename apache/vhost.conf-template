@@ -1,0 +1,10 @@
+NameVirtualHost *:80
+
+<VirtualHost *:80>
+    DocumentRoot /home/drjeep/workspace/gnucash
+    ServerName gnucash
+    Alias /static /home/drjeep/workspace/gnucash/static
+    WSGIDaemonProcess gnucash user=drjeep group=drjeep display-name=%{GROUP}
+    WSGIProcessGroup gnucash
+    WSGIScriptAlias / /home/drjeep/workspace/gnucash/apache/flask.wsgi
+</VirtualHost>

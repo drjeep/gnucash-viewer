@@ -1,0 +1,14 @@
+<html>
+<head>
+{% block css %}{% endblock %}
+</head>
+<body>
+<div class="content">
+{% for message in get_flashed_messages() %}
+    {{ message }}<br>
+{% endfor %}
+{% block content %}{% endblock %}
+</div>
+{% block js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% for acc in accounts %}
+    <a href="{{ url_for('account') }}?account={{ acc }}">{{ acc }}</a><br>
+{% endfor %}
+
+{% endblock %}
