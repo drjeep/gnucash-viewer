@@ -1,4 +1,6 @@
 import os
+from datetime import date
+from decimal import Decimal
 from flask import Flask, render_template, request, redirect, url_for, g
 from flask_debugtoolbar import DebugToolbarExtension
 from gnucash import Session
@@ -41,7 +43,17 @@ def account():
     session = get_session()
     root = session.book.get_root_account()
     ac = root.lookup_by_name(str(account))
-    return get_account_label(ac)
+
+    data = []
+    for split in ac.GetSplitList():
+        trans = split.parent
+        data.append({
+            'date': date.fromtimestamp(trans.GetDate()),
+            'desc': trans.GetDescription(),
+            'amount': Decimal(str(split.GetAmount()))
+        })
+
+    return render_template('account.html', account=get_account_label(ac), data=data)
 
 
 @app.teardown_appcontext
