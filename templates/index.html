@@ -2,8 +2,8 @@
 
 {% block content %}
 
-{% for name, label in accounts %}
-    <a href="{{ url_for('account') }}?account={{ name }}">{{ label }}</a><br>
+{% for guid, label in accounts %}
+    <a href="{{ url_for('account', guid=guid) }}">{{ label }}</a><br>
 {% endfor %}
 
 {% endblock %}

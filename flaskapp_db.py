@@ -22,16 +22,13 @@ toolbar = DebugToolbarExtension(app)
 def index():
     accounts = []
     for ac in get_accounts():
-        accounts.append((ac.name, get_account_label(ac)))
+        accounts.append((ac.guid, get_account_label(ac)))
     return render_template('index.html', accounts=accounts)
 
 
-@app.route('/account/')
-def account():
-    account = request.args.get('account')
-    if not account:
-        redirect(url_for('index'))
-    ac = Account.query.filter_by(name=account).one()
+@app.route('/account/<guid>/')
+def account(guid):
+    ac = Account.query.filter_by(guid=guid).one()
 
     data = []
     for split in Split.query.join(Transaction). \
