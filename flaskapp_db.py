@@ -1,8 +1,8 @@
-import os
 from datetime import date
 from decimal import Decimal
 from flask import Flask, render_template, request, redirect, url_for
 from flask_debugtoolbar import DebugToolbarExtension
+from sqlalchemy import desc
 from database import db_session
 from models import Account, Transaction, Split
 from utils_db import get_accounts, get_account_label
@@ -34,36 +34,37 @@ def account():
     ac = Account.query.filter_by(name=account).one()
 
     data = []
-    for split in Split.query.filter_by(account_guid=ac.guid).all():
-        app.logger.debug(split)
-        trans = Transaction.query.filter_by(guid=split.tx_guid).one()
+    for split in Split.query.join(Transaction). \
+                             filter(Split.account_guid == ac.guid). \
+                             filter(Transaction.post_date > date(2012, 02, 29)). \
+                             order_by(desc(Transaction.post_date)).all():
+        trans = split.transaction
         amount = Decimal(split.value_num / split.value_denom)
         if amount < 0:
             debit, credit = None, amount
         else:
             debit, credit = amount, None
-        t_date = trans.enter_date
-        if t_date.year > 2011:
-            row = {
-                'date': t_date,
-                'desc': trans.description,
+        t_date = trans.post_date
+        row = {
+            'date': t_date,
+            'desc': trans.description,
+            'debit': debit,
+            'credit': credit,
+            'splits': []
+        }
+        for t_split in Split.query.join(Account).filter(Split.tx_guid == trans.guid).all():
+            amount = Decimal(t_split.value_num / t_split.value_denom)
+            account = t_split.account
+            if amount < 0:
+                debit, credit = None, amount
+            else:
+                debit, credit = amount, None
+            row['splits'].append({
+                'account': get_account_label(account),
                 'debit': debit,
-                'credit': credit,
-                'splits': []
-            }
-            for t_split in Split.query.filter(Split.tx_guid == trans.guid).all():
-                amount = Decimal(t_split.value_num / t_split.value_denom)
-                account = Account.query.filter_by(guid=t_split.account_guid).one()
-                if amount < 0:
-                    debit, credit = None, amount
-                else:
-                    debit, credit = amount, None
-                row['splits'].append({
-                    'account': get_account_label(account),
-                    'debit': debit,
-                    'credit': credit
-                })
-            data.append(row)
+                'credit': credit
+            })
+        data.append(row)
 
     return render_template('account.html', account=get_account_label(ac), data=data)
 
