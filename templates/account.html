@@ -13,14 +13,27 @@
     <tr>
         <th>Date</th>
         <th>Description</th>
-        <th>Amount</th>
+        <th>Account</th>
+        <th>Debit</th>
+        <th>Credit</th>
     </tr>
     {% for row in data %}
     <tr>
         <td>{{ row.date }}</td>
         <td>{{ row.desc }}</td>
-        <td>{{ row.amount }}</td>
+        <td></td>
+        <td>{{ row.debit if row.debit != None }}</td>
+        <td>{{ row.credit if row.credit != None }}</td>
     </tr>
+    {% for split in row.splits %}
+    <tr>
+        <td></td>
+        <td></td>
+        <td>{{ split.account if split.account != None }}</td>
+        <td>{{ split.debit if split.debit != None }}</td>
+        <td>{{ split.credit if split.credit != None }}</td>
+    </tr>
+    {% endfor %}
     {% endfor %}
     </table>
 {% endif %}

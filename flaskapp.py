@@ -45,13 +45,31 @@ def account():
     ac = root.lookup_by_name(str(account))
 
     data = []
-    for split in ac.GetSplitList():
+    for i, split in enumerate(ac.GetSplitList()):
         trans = split.parent
+        amount = Decimal(str(split.GetAmount()))
+        if amount < 0:
+            debit, credit = None, amount
+        else:
+            debit, credit = amount, None
         data.append({
             'date': date.fromtimestamp(trans.GetDate()),
             'desc': trans.GetDescription(),
-            'amount': Decimal(str(split.GetAmount()))
+            'debit': debit,
+            'credit': credit,
+            'splits': []
         })
+        for t_split in trans.GetSplitList():
+            amount = Decimal(str(t_split.GetAmount()))
+            if amount < 0:
+                debit, credit = None, amount
+            else:
+                debit, credit = amount, None
+            data[i]['splits'].append({
+                'account': get_account_label(t_split.GetAccount()),
+                'debit': debit,
+                'credit': credit
+            })
 
     return render_template('account.html', account=get_account_label(ac), data=data)
 
