@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, g
 from flask_debugtoolbar import DebugToolbarExtension
 from gnucash import Session
@@ -7,7 +8,7 @@ from utils import get_accounts
 DEBUG = True
 SECRET_KEY = '1234567890'
 DEBUG_TB_INTERCEPT_REDIRECTS = False
-GNUCASH_SESSION = 'mysql://root@localhost/gnucash_test'
+GNUCASH_SESSION = os.path.join(os.path.dirname(__file__), 'docs/test.gnucash')
 
 app = Flask(__name__)
 app.config.from_object(__name__)
