@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, g
 from flask_debugtoolbar import DebugToolbarExtension
 from gnucash import Session
-from utils import get_accounts
+from utils import get_accounts, get_account_label
 
 # configuration
 DEBUG = True
@@ -27,7 +27,9 @@ def get_session():
 def index(name=None):
     session = get_session()
     root = session.book.get_root_account()
-    accounts = [a.name for a in get_accounts(root)]
+    accounts = []
+    for ac in get_accounts(root):
+        accounts.append((ac.name, get_account_label(ac)))
     return render_template('index.html', accounts=accounts)
 
 
@@ -38,8 +40,8 @@ def account():
         redirect(url_for('index'))
     session = get_session()
     root = session.book.get_root_account()
-    account = root.lookup_by_name(str(account))
-    return account.name
+    ac = root.lookup_by_name(str(account))
+    return get_account_label(ac)
 
 
 @app.teardown_appcontext

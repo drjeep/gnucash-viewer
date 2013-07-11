@@ -57,6 +57,12 @@ def get_account_ancestors(account, list=None):
     return list
 
 
+def get_account_label(account):
+    ancestors = get_account_ancestors(account)
+    ancestors.reverse()
+    return ':'.join(a.name for a in ancestors)
+
+
 def create_split_transaction(book, bank_acc_name, exp_acc_name, trans_date, description, amount, vat_incl=True):
     """
     @todo: more generic handling of assets/income/expenses/liabilities
