@@ -3,7 +3,6 @@ from datetime import date
 from decimal import Decimal
 from flask import Flask, render_template, request, redirect, url_for, g
 from flask_debugtoolbar import DebugToolbarExtension
-from database import db_session
 from gnucash import Session
 from utils import get_accounts, get_account_label
 
@@ -13,7 +12,7 @@ SECRET_KEY = '1234567890'
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 GNUCASH_SESSION = os.path.join(os.path.dirname(__file__), 'docs/test.gnucash')
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='app/templates')
 app.config.from_object(__name__)
 
 toolbar = DebugToolbarExtension(app)
@@ -79,11 +78,6 @@ def teardown_request(exception):
     session = getattr(g, 'session', None)
     if session is not None:
         session.end()
-
-
-@app.teardown_appcontext
-def teardown_appcontext(exception):
-    db_session.remove()
 
 
 @app.errorhandler(404)
