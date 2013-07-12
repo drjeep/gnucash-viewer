@@ -36,31 +36,31 @@ def account(guid):
                              filter(Transaction.post_date > date(2012, 02, 29)). \
                              order_by(desc(Transaction.post_date)).all():
         trans = split.transaction
-        amount = Decimal(split.value_num / split.value_denom)
+        amount = Decimal(split.value_num) / Decimal(split.value_denom)
         if amount < 0:
             debit, credit = None, amount
         else:
             debit, credit = amount, None
         t_date = trans.post_date
         row = {
-            'date': t_date,
+            'date': t_date.strftime('%Y-%m-%d'),
             'desc': trans.description,
             'debit': debit,
             'credit': credit,
             'splits': []
         }
-        for t_split in Split.query.join(Account).filter(Split.tx_guid == trans.guid).all():
-            amount = Decimal(t_split.value_num / t_split.value_denom)
-            account = t_split.account
-            if amount < 0:
-                debit, credit = None, amount
-            else:
-                debit, credit = amount, None
-            row['splits'].append({
-                'account': get_account_label(account),
-                'debit': debit,
-                'credit': credit
-            })
+#        for t_split in Split.query.join(Account).filter(Split.tx_guid == trans.guid).all():
+#            amount = Decimal(t_split.value_num / t_split.value_denom)
+#            account = t_split.account
+#            if amount < 0:
+#                debit, credit = None, amount
+#            else:
+#                debit, credit = amount, None
+#            row['splits'].append({
+#                'account': get_account_label(account),
+#                'debit': debit,
+#                'credit': credit
+#            })
         data.append(row)
 
     return render_template('account.html', account=get_account_label(ac), data=data)
