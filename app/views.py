@@ -17,12 +17,18 @@ def index():
 @app.route('/account/<guid>/')
 def account(guid):
     ac = Account.query.filter_by(guid=guid).one()
-
+    q = Split.query.join('account', aliased=True). \
+                    join('transaction', aliased=True). \
+                    outerjoin('splits', aliased=True, from_joinpoint=True). \
+                    join('account', aliased=True, from_joinpoint=True). \
+                    options(db.joinedload('transaction')). \
+                    options(db.joinedload('account')). \
+                    filter(Account.guid == guid). \
+                    filter(Transaction.post_date > date(2012, 02, 29)). \
+                    order_by(db.desc(Transaction.post_date))
+    app.logger.debug(q.count())
     data = []
-    for split in Split.query.join(Transaction). \
-                             filter(Split.account_guid == ac.guid). \
-                             filter(Transaction.post_date > date(2012, 02, 29)). \
-                             order_by(db.desc(Transaction.post_date)).all():
+    for split in q.all():
         trans = split.transaction
         amount = Decimal(split.value_num) / Decimal(split.value_denom)
         if amount < 0:
@@ -37,15 +43,14 @@ def account(guid):
             'credit': credit,
             'splits': []
         }
-#        for t_split in Split.query.join(Account).filter(Split.tx_guid == trans.guid).all():
-#            amount = Decimal(t_split.value_num / t_split.value_denom)
-#            account = t_split.account
+#        for t_split in trans.splits:
+# #            account = t_split.account
 #            if amount < 0:
 #                debit, credit = None, amount
 #            else:
 #                debit, credit = amount, None
 #            row['splits'].append({
-#                'account': get_account_label(account),
+# #                'account': get_account_label(account),
 #                'debit': debit,
 #                'credit': credit
 #            })
