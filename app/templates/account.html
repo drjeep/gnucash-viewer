@@ -1,5 +1,18 @@
 {% extends "base.html" %}
 
+{% block js %}
+<script type="text/javascript">
+$(document).ready(function() {
+    $('tbody tr').click(function() {
+        $tbody = $(this).parent().next();
+        $tbody.removeClass('hidden').siblings('.splits').each(function() {
+            $(this).addClass('hidden');
+        });
+    });
+});
+</script>
+{% endblock %}
+
 {% block content %}
 
 <h1>{{ account }}</h1>
@@ -9,7 +22,8 @@
 {% if not data %}
     <p>No transactions found</p>
 {% else %}
-    <table class="table table-striped">
+    <table class="table">
+    <thead>
     <tr>
         <th>Date</th>
         <th>Description</th>
@@ -17,7 +31,29 @@
         <th>Debit</th>
         <th>Credit</th>
     </tr>
+    <tr>
+        <th>
+            <input type="text" name="date_from" placeholder="From" class="input-small"><br>
+            <input type="text" name="date_to" placeholder="To" class="input-small">
+        </th>
+        <th>
+            <input type="text" name="description" placeholder="Keywords">
+        </th>
+        <th>
+            <input type="text" name="account" placeholder="Keywords">
+        </th>
+        <th>
+            <input type="text" name="debit_from" placeholder="From" class="input-small"><br>
+            <input type="text" name="debit_to" placeholder="To" class="input-small">
+        </th>
+        <th>
+            <input type="text" name="credit_from" placeholder="From" class="input-small"><br>
+            <input type="text" name="credit_to" placeholder="To" class="input-small">
+        </th>
+    </tr>
+    </thead>
     {% for row in data %}
+    <tbody>
     <tr>
         <td>{{ row.date }}</td>
         <td>{{ row.desc }}</td>
@@ -25,15 +61,20 @@
         <td>{{ row.debit if row.debit != None }}</td>
         <td>{{ row.credit if row.credit != None }}</td>
     </tr>
-    {% for split in row.splits %}
-    <tr>
-        <td></td>
-        <td></td>
-        <td>{{ split.account if split.account != None }}</td>
-        <td>{{ split.debit if split.debit != None }}</td>
-        <td>{{ split.credit if split.credit != None }}</td>
-    </tr>
-    {% endfor %}
+    </tbody>
+    {% if row.splits %}
+    <tbody class="splits hidden">
+        {% for split in row.splits %}
+        <tr>
+            <td></td>
+            <td></td>
+            <td>{{ split.account if split.account != None }}</td>
+            <td>{{ split.debit if split.debit != None }}</td>
+            <td>{{ split.credit if split.credit != None }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    {% endif %}
     {% endfor %}
     </table>
 {% endif %}

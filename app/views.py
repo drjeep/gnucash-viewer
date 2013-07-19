@@ -17,14 +17,10 @@ def index():
 @app.route('/account/<guid>/')
 def account(guid):
     ac = Account.query.filter_by(guid=guid).one()
-    q = Split.query.join('account', aliased=True). \
-                    join('transaction', aliased=True). \
+    q = Split.query.join('account', aliased=True).filter(Account.guid == guid). \
+                    join('transaction', aliased=True).options(db.joinedload('transaction')).filter(Transaction.post_date > date(2012, 02, 29)). \
                     outerjoin('splits', aliased=True, from_joinpoint=True). \
                     join('account', aliased=True, from_joinpoint=True). \
-                    options(db.joinedload('transaction')). \
-                    options(db.joinedload('account')). \
-                    filter(Account.guid == guid). \
-                    filter(Transaction.post_date > date(2012, 02, 29)). \
                     order_by(db.desc(Transaction.post_date))
     app.logger.debug(q.count())
     data = []
@@ -43,17 +39,18 @@ def account(guid):
             'credit': credit,
             'splits': []
         }
-#        for t_split in trans.splits:
-# #            account = t_split.account
-#            if amount < 0:
-#                debit, credit = None, amount
-#            else:
-#                debit, credit = amount, None
-#            row['splits'].append({
-# #                'account': get_account_label(account),
-#                'debit': debit,
-#                'credit': credit
-#            })
+        for t_split in trans.splits:
+            account = t_split.account
+            amount = Decimal(t_split.value_num) / Decimal(t_split.value_denom)
+            if amount < 0:
+                debit, credit = None, amount
+            else:
+                debit, credit = amount, None
+            row['splits'].append({
+                'account': account.name,
+                'debit': debit,
+                'credit': credit
+            })
         data.append(row)
 
     return render_template('account.html', account=get_account_label(ac), data=data)
